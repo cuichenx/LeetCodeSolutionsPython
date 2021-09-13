@@ -135,8 +135,6 @@ class Solution:
         print_assert(self.maxProduct_v3('e'*12), 36)
         print(time.time()-t0, 'seconds')
 
-import torch.nn.functional as F
-F.tanh(0)
 
 if __name__ == '__main__':
     sol = Solution()
