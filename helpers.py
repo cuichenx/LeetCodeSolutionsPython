@@ -70,7 +70,9 @@ class ListNode:
 
 class LinkedList:
     @classmethod
-    def makeLinkedList(cls, l: List[int]) -> ListNode:
+    def makeLinkedList(cls, l: List[int]) -> Optional[ListNode]:
+        if not l:
+            return None
         node_head = ListNode()
         node_cur = node_head
         for i in range(len(l) - 1):
@@ -81,15 +83,11 @@ class LinkedList:
         return node_head
 
     @classmethod
-    def printLinkedList(cls, l: ListNode) -> List:
+    def printLinkedList(cls, l: Optional[ListNode]) -> List:
         lst = []
-        while True:
+        while l:
             lst.append(l.val)
-            if l.next:
-                l = l.next
-            else:
-                break
-
+            l = l.next
         return lst
 
 
