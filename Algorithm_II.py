@@ -235,5 +235,134 @@ class AlgoIIDay3:
         print_assert(self.threeSum([0, 0, 0, 0, -1, 1]), [[-1, 0, 1], [0, 0, 0]])
         print_assert(self.threeSum([-2, 0, 1, 1, 2]), [[-2, 0, 2], [-2, 1, 1]])
 
+
+class AlgoIIDay4:
+    def backspaceCompare(self, s: str, t: str) -> bool:
+        # O(1) space solution
+        i, j = len(s) - 1, len(t) - 1
+        s_backs, t_backs = 0, 0
+        s_let, t_let = '', ''
+        while i >= 0 or j >= 0:
+            if i >= 0 and not s_let:  # don't go in here if s_let is not cleared
+                if s[i] == '#':
+                    s_backs += 1
+                elif s_backs > 0:  # if s[i] is a letter and there are pending backspaces
+                    s_backs -= 1
+                else:
+                    s_let = s[i]
+                i -= 1
+            if i < 0 and not s_let:
+                s_let = '^'  # begin symbol, so if there are extra letters in t the comparison would return false
+
+            if j >= 0 and not t_let:
+                if t[j] == '#':
+                    t_backs += 1
+                elif t_backs > 0:
+                    t_backs -= 1
+                else:
+                    t_let = t[j]
+                j -= 1
+            if j < 0 and not t_let:
+                t_let = '^'  # begin symbol, so if there are extra letters in s the comparison would return false
+
+            if s_let and t_let:
+                if s_let == t_let:
+                    s_let, t_let = '', ''  # same letter. can continue
+                else:
+                    return False
+
+        return True
+
+    def test1(self):
+        print_assert(self.backspaceCompare("ab#c", "ad#c"), True)
+        print_assert(self.backspaceCompare("ab##", "c#d#"), True)
+        print_assert(self.backspaceCompare("a##c", "#a#c"), True)
+        print_assert(self.backspaceCompare("a#c", "b"), False)
+        print_assert(self.backspaceCompare("a#c", "c"), True)
+        print_assert(self.backspaceCompare("c", "c"), True)
+        print_assert(self.backspaceCompare("bc", "c"), False)
+        print_assert(self.backspaceCompare("b", "c"), False)
+        print_assert(self.backspaceCompare("c#", "c"), False)
+        print_assert(self.backspaceCompare("c###", "c#"), True)
+        print_assert(self.backspaceCompare("abc#", "#####ab"), True)
+
+    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
+        def get_overlap(first_interval: List[int], second_interval: List[int]) -> Optional[List[int]]:
+            if first_interval[1] < second_interval[0] or second_interval[1] < first_interval[0]:
+                return None  # no overlap
+            elif first_interval[1] > second_interval[1] and second_interval[0] > first_interval[0]:
+                # first interval shadows second
+                return second_interval
+            elif second_interval[1] > first_interval[1] and first_interval[0] > second_interval[0]:
+                # second interval shadows first
+                return first_interval
+            else:
+                return [max(first_interval[0], second_interval[0]), min(first_interval[1], second_interval[1])]
+
+        i, j = 0, 0
+        ret = []
+        while i < len(firstList) and j < len(secondList):
+            overlap = get_overlap(firstList[i], secondList[j])
+            if overlap:
+                ret.append(overlap)
+            if firstList[i][1] > secondList[j][1]:
+                j += 1
+            else:
+                i += 1
+        return ret
+
+    def test2(self):
+        print_assert(self.intervalIntersection([[0,2],[5,10],[13,23],[24,25]], [[1,5],[8,12],[15,24],[25,26]]),
+                     [[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]])
+        print_assert(self.intervalIntersection([[1,3],[5,9]], []), [])
+        print_assert(self.intervalIntersection([], [[1,3],[5,9]]), [])
+        print_assert(self.intervalIntersection([[1,7]], [[3,10]]), [[3,7]])
+        print_assert(self.intervalIntersection([[1,7]], [[3,10]]), [[3,7]])
+        print_assert(self.intervalIntersection([[5, 10]], [[3,10]]), [[5,10]])
+        print_assert(self.intervalIntersection([[3, 10]], [[5,10]]), [[5,10]])
+        print_assert(self.intervalIntersection([[3,5],[9,20]], [[4,5],[7,10],[11,12],[14,15],[16,20]]),
+                     [[4,5],[9,10],[11,12],[14,15],[16,20]])
+
+    def maxArea_wrong(self, height: List[int]) -> int:
+        n = len(height)
+        left = [(height[0], 0)]
+        right = [(height[-1], 0)]  # order is reversed
+        for i in range(1, n):
+            if height[i] > left[-1][0]:
+                left.append((height[i], 0))
+            else:
+                left.append((left[-1][0], left[-1][1]+1))
+            if height[-i-1] > right[-1][0]:
+                right.append((height[-i-1], 0))
+            else:
+                right.append((right[-1][0], right[-1][1]+1))
+        cur_max = 0
+        for (lh, li), (rh, ri) in zip(left, reversed(right)):
+            cur_max = max(cur_max, min(lh, rh) * (li + ri))
+        return cur_max
+
+    def maxArea(self, height: List[int]) -> int:
+        n = len(height)
+        i, j = 0, n-1
+        cur_max = 0
+        while j > i:
+            cur_max = max(cur_max, (j - i) * min(height[i], height[j]))
+            if height[i] < height[j]:
+                # try to get a higher left beam
+                i += 1
+            else:
+                j -= 1
+        return cur_max
+
+    def test3(self):
+        print_assert(self.maxArea([1,8,6,2,5,4,8,3,7]), 49)
+        print_assert(self.maxArea([1, 1]), 1)
+        print_assert(self.maxArea([4, 3, 2, 1, 4]), 16)
+        print_assert(self.maxArea([1, 2, 1]), 2)
+
+
+
+
+
 if __name__ == '__main__':
-    AlgoIIDay3().test2()
+    AlgoIIDay4().test3()
