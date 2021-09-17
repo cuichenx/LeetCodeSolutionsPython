@@ -1,7 +1,7 @@
 import bisect
 import math
 import time
-from collections import defaultdict
+from collections import defaultdict, Counter
 from typing import List, Optional
 
 from helpers import print_assert, ListNode, LinkedList as ll
@@ -361,8 +361,96 @@ class AlgoIIDay4:
         print_assert(self.maxArea([1, 2, 1]), 2)
 
 
+class AlgoIIDay5:  # sliding window
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        p_bag = Counter(p)
+        window = Counter(s[:len(p)])
+        ret = []
+        for i in range(len(s) - len(p)):
+            if window == p_bag:
+                ret.append(i)
 
+            window[s[i+len(p)]] += 1
+            window[s[i]] -= 1
+            if window[s[i]] == 0:
+                del window[s[i]]
 
+        if window == p_bag:
+            ret.append(len(s)-len(p))
+        return ret
+
+    def test1(self):
+        print_assert(self.findAnagrams("cbaebabacd", "abc"), [0, 6])
+        print_assert(self.findAnagrams("abab", "ab"), [0, 1, 2])
+        print_assert(self.findAnagrams("ab", "abc"), [])
+        print_assert(self.findAnagrams("abc", "abcafasfasf"), [])
+
+    def numSubarrayProductLessThanK_slow(self, nums: List[int], k: int) -> int:
+        # n^2, slow!!
+        cumul_log_prod = [0]
+        if k == 0:
+            return 0
+        logk = math.log10(k)
+        count = 0
+        for num in nums:
+            cumul_log_prod.append(cumul_log_prod[-1]+math.log10(num))  # num will never be negative
+        for i in range(len(nums)):
+            for j in range(i+1, len(nums)+1):
+                if cumul_log_prod[j] - cumul_log_prod[i] < logk - 1e-9:
+                    count += 1
+        return count
+
+    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:
+        if k == 0:
+            return 0
+        i = 0
+        count = 0
+        window_prod = 1
+        # following hint, for each j, find the largest window (left most i) whose product is less than k
+        for j in range(len(nums)):
+            window_prod *= nums[j]  # add nums[j] to window
+            while window_prod >= k and i <= j:
+                window_prod /= nums[i]  # remove nums[i] from window
+                i += 1
+            # now window_prod < k, or i = j+1
+            count += (j+1-i)
+        return count
+
+    def test2(self):
+        print_assert(self.numSubarrayProductLessThanK([10, 5, 2, 6], 100), 8)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 0), 0)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 1), 0)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 2), 1)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 3), 3)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 4), 4)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 5), 4)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 6), 4)
+        print_assert(self.numSubarrayProductLessThanK([1, 2, 3], 7), 6)
+
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        i, j = 0, 1  # range [i, j)
+        min_len = len(nums)+1
+        window_sum = nums[0]
+        while j <= len(nums):
+            if window_sum >= target:
+                min_len = min(min_len, j-i)
+                window_sum -= nums[i]
+                i += 1  # try a shorted window
+            elif j == len(nums):
+                break
+            else:
+                window_sum += nums[j]
+                j += 1  # try a longer window
+        if min_len == len(nums)+1:
+            return 0
+        return min_len
+
+    def test3(self):
+        print_assert(self.minSubArrayLen(7, [2, 3, 1, 2, 4, 3]), 2)
+        print_assert(self.minSubArrayLen(7, [2, 3, 1, 2, 4, 3, 1]), 2)
+        print_assert(self.minSubArrayLen(7, [2, 3, 1, 2, 4, 3, 7]), 1)
+        print_assert(self.minSubArrayLen(4, [1, 4, 4]), 1)
+        print_assert(self.minSubArrayLen(11, [1, 1, 1, 1, 1]), 0)
 
 if __name__ == '__main__':
-    AlgoIIDay4().test3()
+    AlgoIIDay5().test3()
