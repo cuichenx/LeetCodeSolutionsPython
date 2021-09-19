@@ -452,5 +452,10 @@ class AlgoIIDay5:  # sliding window
         print_assert(self.minSubArrayLen(4, [1, 4, 4]), 1)
         print_assert(self.minSubArrayLen(11, [1, 1, 1, 1, 1]), 0)
 
+
+class AlgoIIDay6:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        ...
+
 if __name__ == '__main__':
     AlgoIIDay5().test3()
