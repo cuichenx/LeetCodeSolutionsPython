@@ -1,10 +1,10 @@
 import bisect
 import math
 import time
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, deque
 from typing import List, Optional
 
-from helpers import print_assert, ListNode, LinkedList as ll
+from helpers import print_assert, ListNode, LinkedList as ll, Tree as tr
 import heapq
 
 
@@ -455,7 +455,128 @@ class AlgoIIDay5:  # sliding window
 
 class AlgoIIDay6:
     def numIslands(self, grid: List[List[str]]) -> int:
-        ...
+        q = deque([])
+        m, n = len(grid), len(grid[0])
+        island_count = 0
+        for global_i in range(m):
+            for global_j in range(n):
+                if grid[global_i][global_j] == '1':
+                    # new island found
+                    island_count += 1
+                    q.append((global_i, global_j))
+                    while len(q) > 0:
+                        i, j = q.popleft()
+                        if grid[i][j] == '1':
+                            grid[i][j] = 'x'
+                            if i > 0 and grid[i-1][j] == '1':
+                                q.append((i-1, j))  # up; this probably won't happen
+                            if i < m-1 and grid[i+1][j] == '1':
+                                q.append((i+1, j))  # down
+                            if j > 0 and grid [i][j-1] == '1':
+                                q.append((i, j-1))  # left
+                            if j < n-1 and grid[i][j+1] == '1':
+                                q.append((i, j+1))
+        return island_count
+    # Time: O(MN)
+    # Space: O(MN)
+    def test1(self):
+        print_assert(self.numIslands([
+                      ["1","1","1","1","0"],
+                      ["1","1","0","1","0"],
+                      ["1","1","0","0","0"],
+                      ["0","0","0","0","0"]
+                    ]), 1)
+        print_assert(self.numIslands([
+                      ["1","1","0","0","0"],
+                      ["1","1","0","0","0"],
+                      ["0","0","1","0","0"],
+                      ["0","0","0","1","1"]
+                    ]), 3)
+
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        explored = set([])
+        q = deque([])
+        n = len(isConnected)
+        num_provinces = 0
+        for i in range(n):
+            if i in explored: continue
+            # i is a new group of nodes
+            num_provinces += 1
+            # add neighbours of i to explored
+            q.append(i)
+            while len(q) > 0:
+                cur_node = q.popleft()
+                # if cur_node in explored: continue
+                explored.add(cur_node)
+                for j, is_connected in enumerate(isConnected[cur_node]):
+                    if is_connected and j not in explored:
+                        q.append(j)
+        return num_provinces
+
+    def test2(self):
+        print_assert(self.findCircleNum([[1,1,0],[1,1,0],[0,0,1]]), 2)
+        print_assert(self.findCircleNum([[1,0,0],[0,1,0],[0,0,1]]), 3)
+        print_assert(self.findCircleNum([[1,1,0],[1,1,1],[0,1,1]]), 1)
+
+
+class AlgoIIDay7:
+    from helpers import TreeNode
+    def connect(self, root: 'TreeNode') -> 'TreeNode':
+        # BFS on tree
+        if root is None:
+            return root
+        cur_level = []
+        next_level = [root]
+        while len(next_level) > 0:
+            cur_level, next_level = next_level, []
+            # do the next connections
+            for i in range(len(cur_level)-1):
+                cur_level[i].next = cur_level[i+1]
+            cur_level[-1].next = None
+
+            # get the next level ready
+            for node in cur_level:
+                if node.left:
+                    next_level.append(node.left)
+                if node.right:
+                    next_level.append(node.right)
+        return root
+# Time O(N)
+# Space O(N)
+# Space optimization: instead of saving the "next_level", save only the first element of next level
+# use the next pointer to fill up the row
+
+    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        # do bfs of tree, do treeEqual on each node
+        q = deque([root])
+        while len(q) > 0:
+            cur_node = q.popleft()
+            if self.treeEqual(cur_node, subRoot):
+                return True
+            if cur_node:
+                if cur_node.left:
+                    q.append(cur_node.left)
+                if cur_node.right:
+                    q.append(cur_node.right)
+        return False
+
+
+    def treeEqual(self, root: Optional[TreeNode], other: Optional[TreeNode]) -> bool:
+        if root is None and other is None:
+            return True
+        elif root is None or other is None:
+            return False
+        elif root.val == other.val:
+            return self.treeEqual(root.left, other.left) and self.treeEqual(root.right, other.right)
+        else:
+            return False
+
+    def test2(self):
+        null = None
+        print_assert(self.isSubtree(tr.list2tree([3, 4, 5, 1, 2]), tr.list2tree([4, 1, 2])), True)
+        print_assert(self.isSubtree(tr.list2tree([3,4,5,1,2,null,null,null,null,0]), tr.list2tree([4, 1, 2])), False)
+        print_assert(self.isSubtree(tr.list2tree([3]), tr.list2tree([4])), False)
+        print_assert(self.isSubtree(tr.list2tree([4]), tr.list2tree([4])), True)
 
 if __name__ == '__main__':
-    AlgoIIDay5().test3()
+    AlgoIIDay7().test2()
