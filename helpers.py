@@ -1,7 +1,6 @@
 from collections import deque
 from typing import List, Optional
 
-
 def print_assert(actual, expected):
     if isinstance(expected, tuple):  # multiple acceptable answers
         print(f"{'✔️' if actual in expected else '❌️'} Actual: {actual}   Expected: {expected}")

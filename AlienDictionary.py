@@ -1,5 +1,6 @@
-from typing import List
-from helpers import print_assert
+from typing import List, Optional
+from helpers import print_assert, ListNode, LinkedList as ll
+
 
 class Q269:
     # 269. Alien Dictionary
@@ -79,7 +80,37 @@ class Q269:
         print_assert(self.alienOrder(["ab", "abc"]), "cba")
         print_assert(self.alienOrder(["bc","b","cbc"]), "")
 
+class Q19:
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        # find out the length of the linked list
+        if head is None:
+            return None
 
+        l = 0
+        cur = head
+        while cur:
+            cur = cur.next
+            l += 1
+
+        if n > l:
+            return head
+        if n == l:
+            return head.next
+
+        ## n < l
+        cur = head
+        for i in range(l - n - 1):
+            cur = cur.next
+
+        cur.next = cur.next.next  # delete (l-n-1)th node from the beginning
+
+        return head
+
+    def test(self):
+        print_assert(ll.printLinkedList(self.removeNthFromEnd(ll.makeLinkedList([1, 2, 3, 4, 5]), 2)), [1, 2, 3, 5])
+        print_assert(ll.printLinkedList(self.removeNthFromEnd(ll.makeLinkedList([1]), 1)), [])
+        print_assert(ll.printLinkedList(self.removeNthFromEnd(ll.makeLinkedList([1, 2]), 1)), [1])
+        print_assert(ll.printLinkedList(self.removeNthFromEnd(ll.makeLinkedList([1, 2]), 1)), [1])
 
 if __name__ == '__main__':
-    Q269().test()
+    Q19().test()
