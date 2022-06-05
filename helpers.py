@@ -7,6 +7,13 @@ def print_assert(actual, expected):
     else:
         print(f"{'✔️' if actual == expected else '❌️'} Actual: {actual}   Expected: {expected}")
 
+def print_matrix(matrix):
+    # https://stackoverflow.com/questions/13214809/pretty-print-2d-list
+    s = [[str(e) for e in row] for row in matrix]
+    lens = [max(map(len, col)) for col in zip(*s)]
+    fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
+    table = [fmt.format(*row) for row in s]
+    print('\n'.join(table))
 
 class Bisect:
     @classmethod
