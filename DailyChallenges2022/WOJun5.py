@@ -264,5 +264,21 @@ class Q146:
         print_assert(lru.get(4), 4)
 
 
+class Q1332:
+    # You are given a string s consisting only of letters 'a' and 'b'. In a single step you can remove one palindromic
+    # subsequence from s.
+    # Return the minimum number of steps to make the given string empty.
+    def removePalindromeSub(self, s: str) -> int:
+        # this is a fucking brainteaser lmao
+        # if s is a palindrome, then answer is 1
+        # else answer is 2, because you can remove all a's and then all b's
+        return 1 if s[::-1] == s else 2
+
+    def test(self):
+        print_assert(self.removePalindromeSub('ababa'), 1)
+        print_assert(self.removePalindromeSub('abb'), 2)
+        print_assert(self.removePalindromeSub('baabb'), 2)
+
+
 if __name__ == '__main__':
-    Q146().test()
+    Q1332().test()
