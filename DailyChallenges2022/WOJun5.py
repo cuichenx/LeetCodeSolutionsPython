@@ -1,5 +1,6 @@
 import sys
 from collections import deque
+from functools import lru_cache
 from typing import List, Optional
 
 sys.path.append("..")
@@ -279,6 +280,97 @@ class Q1332:
         print_assert(self.removePalindromeSub('abb'), 2)
         print_assert(self.removePalindromeSub('baabb'), 2)
 
+class Q3:
+    # Given a string s, find the length of the longest substring without repeating characters.
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        cur_letters = set([])
+        max_len = 0
+        begin = 0
+        for end in range(len(s)):
+            if s[end] in cur_letters:
+                # advance `begin` until you reach the repeated letter
+                while s[begin] != s[end]:
+                    cur_letters.remove(s[begin])
+                    begin += 1
+                begin += 1  # start fresh
+            else:
+                # add this letter to the current substring
+                cur_letters.add(s[end])
+                max_len = max(max_len, end-begin+1)
+        return max_len
+
+    def test(self):
+        print_assert(self.lengthOfLongestSubstring('abcabcbb'), 3)
+        print_assert(self.lengthOfLongestSubstring('bbbbb'), 1)
+        print_assert(self.lengthOfLongestSubstring('pwwkew'), 3)
+        print_assert(self.lengthOfLongestSubstring(''), 0)
+        print_assert(self.lengthOfLongestSubstring('abcde'), 5)
+
+
+class Q1151:
+    # Given a binary array data, return the minimum number of swaps required to group all 1’s present in the array
+    # together in any place in the array.
+    def minSwaps(self, data: List[int]) -> int:
+        # first count how many 1's there are in total
+        num_1s = data.count(1)
+
+        # imagine you have a sliding windows of `num_1s` many ones.
+        # you do a bitwise XOR to get the number of swaps required
+        # if this window is the place where the gourp of all 1s are
+        # an easier way to implement this is to only count the updates, instead of counting the whole window
+        window_xor = data[:num_1s].count(0)
+        min_swaps = window_xor
+        for j in range(num_1s, len(data)):
+            window_xor += (data[j]==0) - (data[j-num_1s]==0)
+            min_swaps = min(min_swaps, window_xor)
+        return min_swaps
+
+    def test(self):
+        print_assert(self.minSwaps([1, 0, 1, 0, 1]), 1)
+        print_assert(self.minSwaps([0, 0, 0, 1, 0]), 0)
+        print_assert(self.minSwaps([1,0,1,0,1,0,0,1,1,0,1]), 3)
+
+class Q1197:
+    # In an infinite chess board with coordinates from -infinity to +infinity, you have a knight at square [0, 0].
+    # Return the minimum number of steps needed to move the knight to the square [x, y]
+    def minKnightMoves(self, x: int, y: int) -> int:
+        # gradually fan out from the src
+        q = deque([(x, y, 0)])
+
+        while len(q) > 0:
+            cur_x, cur_y, cur_steps = q.popleft()
+            if cur_x == cur_y == 0:
+                return cur_steps
+            for d_x, d_y in self.get_options(cur_x, cur_y):
+                next_x = cur_x + d_x
+                next_y = cur_y + d_y
+                q.append((next_x, next_y, cur_steps + 1))
+
+    def get_options(self, x, y):
+        if abs(x) + abs(y) > 7:
+            # just get closer
+            if x >= 0 and y >= 0:  # go SW
+                return [(-2, -1) if abs(x) > abs(y) else (-1, -2)]
+            if x >= 0 and y < 0:  # go NW
+                return [(-2,  1) if abs(x) > abs(y) else (-1,  2)]
+            if x < 0 and y >= 0:  # go SE
+                return [( 2, -1) if abs(x) > abs(y) else ( 1, -2)]
+            if x < 0 and y < 0:  # go NE
+                return [( 2,  1) if abs(x) > abs(y) else ( 1,  2)]
+        else:
+            return [( 1,  2), (-1,  2),
+                    ( 1, -2), (-1, -2),
+                    (-2,  1), (-2, -1),
+                    ( 2,  1), ( 2, -1)]
+
+    def test(self):
+        print_assert(self.minKnightMoves(2, 1), 1)
+        print_assert(self.minKnightMoves(5, 5), 4)
+        print_assert(self.minKnightMoves(2, -2), 4)
+        print_assert(self.minKnightMoves(-5, -4), 3)
+        print_assert(self.minKnightMoves(3, 4), 3)
+        print_assert(self.minKnightMoves(0, 0), 0)
+        print_assert(self.minKnightMoves(2, 112), 56)
 
 if __name__ == '__main__':
-    Q1332().test()
+    Q1197().test()
