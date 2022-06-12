@@ -372,5 +372,68 @@ class Q1197:
         print_assert(self.minKnightMoves(0, 0), 0)
         print_assert(self.minKnightMoves(2, 112), 56)
 
+
+class Q1695:
+    # You are given an array of positive integers nums and want to erase a subarray containing unique elements.
+    # The score you get by erasing the subarray is equal to the sum of its elements.
+    # Return the maximum score you can get by erasing exactly one subarray.
+    def maximumUniqueSubarray(self, nums: List[int]) -> int:
+        # very similar to Q3
+        max_sum = 0
+        cur_sum = 0
+        cur_subarray = set([])
+        begin = 0
+        for end in range(len(nums)):
+            if nums[end] in cur_subarray:
+                # move begin pointer until the subarray is unique again
+                while nums[begin] != nums[end]:
+                    cur_sum -= nums[begin]
+                    cur_subarray.remove(nums[begin])
+                    begin += 1
+                begin += 1
+            else:
+                cur_subarray.add(nums[end])
+                cur_sum += nums[end]
+                max_sum = max(max_sum, cur_sum)
+        return max_sum
+
+    def test(self):
+        print_assert(self.maximumUniqueSubarray([4, 2, 4, 5, 6]), 17)
+        print_assert(self.maximumUniqueSubarray([5, 2, 1, 2, 5, 2, 1, 2, 5]), 8)
+        print_assert(self.maximumUniqueSubarray([5]), 5)
+        print_assert(self.maximumUniqueSubarray([5, 2]), 7)
+        print_assert(self.maximumUniqueSubarray([5, 5]), 5)
+
+
+class Q1658:
+    # Return the minimum number of left or right edge elements needed to sum to x. return -1 if impossible
+    def minOperations(self, nums: List[int], x: int) -> int:
+        subsum_target = sum(nums) - x
+        if subsum_target == 0:
+            return len(nums)
+        # equivalent problem: find the longest subarray that sums to subsum_target
+        wanted = {subsum_target: -1}
+        cum_sum = 0
+        longest_subarray = 0
+        for idx, num in enumerate(nums):
+            cum_sum += num
+            if cum_sum in wanted:
+                longest_subarray = max(longest_subarray, idx - wanted[cum_sum])
+            wanted[cum_sum + subsum_target] = idx
+        return -1 if longest_subarray == 0 else len(nums) - longest_subarray
+
+    def test(self):
+        print_assert(self.minOperations([1, 1, 4, 2, 3], 5), 2)
+        print_assert(self.minOperations([5, 6, 7, 8, 9], 4), -1)
+        print_assert(self.minOperations([3, 2, 20, 1, 1, 3], 10), 5)
+        print_assert(self.minOperations([1, 4, 7, 2, 3, 2, 3, 2], 13), 6)
+        print_assert(self.minOperations([1, 4, 7, 2, 3, 2, 3, 1], 12), 3)
+        print_assert(self.minOperations([1], 1), 1)
+        print_assert(self.minOperations([1, 2], 1), 1)
+        print_assert(self.minOperations([2, 2], 1), -1)
+        print_assert(self.minOperations([4, 3, 2], 4), 1)
+        print_assert(self.minOperations([4, 3, 2], 9), 3)
+
+
 if __name__ == '__main__':
-    Q1197().test()
+    Q1658().test()
