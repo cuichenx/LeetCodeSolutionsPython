@@ -434,6 +434,69 @@ class Q1658:
         print_assert(self.minOperations([4, 3, 2], 4), 1)
         print_assert(self.minOperations([4, 3, 2], 9), 3)
 
+class Q120:
+    # Given a triangle array, return the minimum path sum from top to bottom.
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        # opt[i+1, j+1] = x[i+1, j+1] + max(opt[i, j], opt[i, j+1])
+        # fancy version where you only save the current row and next row
+        cur_row = triangle[0]
+        num_rows = len(triangle)
+        for i in range(1, num_rows):
+            # for leftmost element, can only come from the one directly above
+            next_row = [triangle[i][0] + cur_row[0]]
+            for j in range(1, len(cur_row)):
+                next_row.append(triangle[i][j] + min(cur_row[j], cur_row[j-1]))
+            # for the rightmost element, can only come from the one NW of it
+            next_row.append(triangle[i][-1] + cur_row[-1])
+            cur_row = next_row
+        return min(cur_row)
+    # if in place is allowed, then can make it O(1) space
+
+    def test(self):
+        print_assert(self.minimumTotal([[2],[3,4],[6,5,7],[4,1,8,3]]), 11)
+        print_assert(self.minimumTotal([[2],[3,4],[6,5,7],[4,1,8,3],[10,11,12,1,2]]), 17)
+        print_assert(self.minimumTotal([[-10]]), -10)
+
+class Q583:
+    # 583. Delete Operation for Two Strings
+    # Given two strings word1 and word2, return the minimum number of steps required to make word1 and word2 the same.
+    # In one step, you can delete exactly one character in either string.
+    def minDistance(self, word1: str, word2: str) -> int:
+        # this is basically a version of levenstein distance, but substitution costs 2 instead of 1
+        # we can save space by memoizing only the current and previous row
+        # image word1 on the vertical axis and word2 on the horizontal axis
+        cur_row = list(range(len(word2)+1))
+        for i in range(1, len(word1)+1):
+            next_row = [i]
+            for j in range(1, len(word2)+1):
+                if word1[i-1] == word2[j-1]:
+                    next_row.append(cur_row[j-1])  # inherit NW
+                else:
+                    next_row.append(1+min(cur_row[j], next_row[j-1]))
+            cur_row = next_row
+        return cur_row[-1]
+
+    def test(self):
+        print_assert(self.minDistance("sea", "eat"), 2)
+        print_assert(self.minDistance("leetcode", "etco"), 4)
+        print_assert(self.minDistance("leetcode", "ecobee"), 6)
+
+class Q1048:
+    # 1048. Longest String Chain
+    def longestStrChain(self, words: List[str]) -> int:
+        length_dict = {word: 1 for word in words}
+        for word in sorted(words, key=lambda w: len(w)):
+            for char_idx in range(len(word)):
+                shorter_word = word[:char_idx]+word[char_idx+1:]
+                if shorter_word in length_dict:
+                    length_dict[word] = max(length_dict[word], length_dict[shorter_word] + 1)
+        return max(length_dict.values())
+
+    def test(self):
+        print_assert(self.longestStrChain(["a","b","ba","bca","bda","bdca"]), 4)
+        print_assert(self.longestStrChain(["xbc","pcxbcf","xb","cxbc","pcxbc"]), 5)
+        print_assert(self.longestStrChain(["abcd","dbqca"]), 1)
+
 
 if __name__ == '__main__':
-    Q1658().test()
+    Q1048().test()
