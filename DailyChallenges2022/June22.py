@@ -497,6 +497,45 @@ class Q1048:
         print_assert(self.longestStrChain(["xbc","pcxbcf","xb","cxbc","pcxbc"]), 5)
         print_assert(self.longestStrChain(["abcd","dbqca"]), 1)
 
+class Q5:
+    # 5. Longest Palindromic Substring
+    # Given a string s, return the longest palindromic substring in s.
+    def longestPalindrome(self, s: str) -> str:
+        # for each pivot, expand outward
+        longest_palin_begin, longest_palin_end = 0, 1
+        self.s = s
+        # odd length palindromes: pivot is each element
+        for pivot_idx in range(1, len(s)-1):
+            expand = 1
+            while self.check_expansion(pivot_idx, expand):
+                if 1+expand*2 > longest_palin_end - longest_palin_begin:
+                    longest_palin_begin, longest_palin_end = pivot_idx-expand, pivot_idx+expand+1
+                expand += 1
+
+        # even length palindromes: pivot is between each consecutive elements
+        # pivot idx is idx of element right of the pivot
+        for pivot_idx in range(1, len(s)):
+            expand = 1
+            while self.check_expansion(pivot_idx-0.5, expand-0.5):
+                if expand * 2 > longest_palin_end - longest_palin_begin:
+                    longest_palin_begin, longest_palin_end = pivot_idx - expand, pivot_idx + expand
+                expand += 1
+
+        return s[longest_palin_begin:longest_palin_end]
+
+    def check_expansion(self, pivot_idx, expand):
+        if pivot_idx + expand >= len(self.s) or pivot_idx - expand < 0:
+            return False
+        return self.s[int(pivot_idx+expand)] == self.s[int(pivot_idx-expand)]
+
+    def test(self):
+        print_assert(self.longestPalindrome('babad'), 'bab')
+        print_assert(self.longestPalindrome('cbbd'), 'bb')
+        print_assert(self.longestPalindrome('babadabd'), 'badab')
+        print_assert(self.longestPalindrome('b'), 'b')
+        print_assert(self.longestPalindrome('bb'), 'bb')
+        print_assert(self.longestPalindrome('bbb'), 'bbb')
+        print_assert(self.longestPalindrome('bab'), 'bab')
 
 if __name__ == '__main__':
-    Q1048().test()
+    Q5().test()
