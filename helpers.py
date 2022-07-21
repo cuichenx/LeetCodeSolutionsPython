@@ -3,9 +3,26 @@ from typing import List, Optional
 
 def print_assert(actual, expected):
     if isinstance(expected, tuple):  # multiple acceptable answers
-        print(f"{'✔️' if actual in expected else '❌️'} Actual: {actual}   Expected: {expected}")
+        is_correct = actual in expected
     else:
-        print(f"{'✔️' if actual == expected else '❌️'} Actual: {actual}   Expected: {expected}")
+        is_correct = actual == expected
+
+    print(f"{'✔️' if is_correct else '❌️'} Actual: {actual}   Expected: {expected}")
+    return is_correct
+
+def print_assert_stream(obj, ops, inputs, expected):
+    for i, (op, inp, ex) in enumerate(zip(ops, inputs, expected)):
+        if op == obj.__class__.__name__:
+            print(i, "✔ Initializer.")
+            continue
+        print(i, end=' ')
+        if not print_assert(obj.__getattribute__(op)(*inp), ex):
+            break
+    else:  # nobreak
+        print("All tests passed")
+        return True
+    print("Some tests failed, stopping")
+    return False
 
 def print_matrix(matrix):
     # https://stackoverflow.com/questions/13214809/pretty-print-2d-list

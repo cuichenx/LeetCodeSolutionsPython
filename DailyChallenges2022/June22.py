@@ -1,7 +1,7 @@
 import sys
 from collections import deque
 from functools import lru_cache
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 sys.path.append("..")
 from helpers import print_assert, print_matrix, ListNode, LinkedList as ll
@@ -537,5 +537,80 @@ class Q5:
         print_assert(self.longestPalindrome('bbb'), 'bbb')
         print_assert(self.longestPalindrome('bab'), 'bab')
 
+## BEGIN TRIP
+class TrieNode:
+    def __init__(self, char: str, word_idx: int=-1, children: Optional[Dict[str, 'TrieNode']]=None):
+        self.char = char
+        self.children: Dict[str, 'TrieNode'] = children or {}
+        self.word_idx = word_idx  # if word_idx is not 1, then it represents the end of a word here
+        # this may be overwritten, but this question states
+        # "If there is more than one valid index, return the largest of them."
+
+    def __repr__(self):
+        return f"TrieNode(char={self.char}, n_children={len(self.children)}, word_idx={self.word_idx})"
+
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode("#")
+
+    def add(self, word: str, idx: int=-1):
+        cur_node = self.root
+        for char in word:
+            if char in cur_node.children:
+                cur_node = cur_node.children[char]
+                cur_node.word_idx = idx
+            else:
+                new_node = TrieNode(char, word_idx = idx)
+                cur_node.children[char] = new_node
+                cur_node = new_node
+
+        # at this stage, the last char is recorded
+
+    def find(self, prefix):
+        cur_node = self.root
+        for char in prefix:
+            if char in cur_node.children:
+                cur_node = cur_node.children[char]
+            else:
+                return -1
+        return cur_node.word_idx
+
+
+class WordFilter:
+    def __init__(self, words: List[str]):
+        # build a prefix-suffix tree here
+        self.trie = Trie()
+        for i, word in enumerate(words):
+            # 'test' -> "_test", "t_test", "st_test", "est_test", "test_test"
+            for j in range(len(word)+1):
+                new_word = word[j:]+'_'+word
+                self.trie.add(new_word, i)
+
+    def f(self, prefix: str, suffix: str) -> int:
+        new_prefix = suffix + '_' + prefix
+        return self.trie.find(new_prefix)
+
+
+class Q745:
+    # 745. Prefix and Suffix Search
+    # Design a special dictionary with some words that searchs the words in it by a prefix and a suffix.
+    def test(self):
+        wf = WordFilter(['apple'])
+        print_assert(wf.f('a', 'e'), 0)
+        wf = WordFilter(['apple', 'ape', 'adolf', 'hello'])
+        print_assert(wf.f('a', 'e'), 1)
+
+
+class Q1689:
+    # 1689. Partitioning Into Minimum Number Of Deci-Binary Numbers
+    def minPartitions(self, n: str) -> int:
+        return int(max(n))
+
+    def test(self):
+        print_assert(self.minPartitions('32'), 3)
+        print_assert(self.minPartitions('82734'), 8)
+        print_assert(self.minPartitions('27346209830709182346'), 9)
+
 if __name__ == '__main__':
-    Q5().test()
+    Q1689().test()
