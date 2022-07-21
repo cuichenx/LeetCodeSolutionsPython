@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import List, Optional, Dict
 
 sys.path.append("..")
-from helpers import print_assert, print_matrix, ListNode, LinkedList as ll
+from helpers import print_assert, print_matrix, ListNode, LinkedList as ll, TreeNode, Tree as tr
 import copy
 import time
 
