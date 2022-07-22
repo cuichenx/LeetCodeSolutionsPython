@@ -88,7 +88,7 @@ class ListNode:
         self.next = next
 
     def __repr__(self):
-        return f"ListNode(val={self.val}, next={self.next.val})"
+        return f"ListNode(val={self.val}, next={None if not self.next else self.next.val})"
 
 
 class LinkedList:
